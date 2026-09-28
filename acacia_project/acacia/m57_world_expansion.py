@@ -280,6 +280,20 @@ class WeatherSim:
         """Alias for tick() for compatibility with update() call pattern."""
         return self.tick(dt)
 
+    def m19_weather(self):
+        """Return weather snapshot for m35 camera world integration."""
+        return {
+            "season": self.season,
+            "weather": self.weather,
+            "temperature": self.temperature,
+            "precipitation": self.precipitation,
+            "wind": self.wind,
+        }
+
+    def snapshot(self):
+        """Return current weather state snapshot."""
+        return self.m19_weather()
+
     def to_dict(self):
         return {
             "time": self.time,
