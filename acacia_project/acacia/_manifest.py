@@ -64,4 +64,6 @@ PATCHES = [
     ('m52_life', 'destinations, investigation, physical food, visiting friends, truthful decision display, less noise'),
     ('m53_upgrades', 'attention, carried items, indoor sleep, storm shelter, calm wildlife, quality governor, right-click, diary, stance, social chat'),
     ('m54_bridge', 'Python -> browser state bridge (SSE, metres, 10 Hz), GPU world view launcher'),
+    ('m55_casino', 'persistent casino district: roulette, blackjack, slots, poker, NPC personalities, memory integration'),
+    ('m56_casino_integration', 'casino hooks into M42 agency, M43 continuity, M46 world, M44 economy, M04 memory'),
 ]
