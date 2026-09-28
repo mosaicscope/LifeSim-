@@ -129,6 +129,8 @@ class Psyche:
         self.places = {}
         self.home = None
         self.goal = "explore"
+        self.prev_goal = None
+        self.goal_commit_time = 0.0  # time spent on current goal (prevent rapid switching)
         self.next = r.uniform(0.0, 0.8)
         self.acc = 0.0
         self.jane_last = -1e9
@@ -165,7 +167,8 @@ class Psyche:
     def to_dict(self):
         return {"sp": self.sp, "seed": self.seed, "need": self.need, "phys": self.phys,
                 "rel": self.rel, "mem": self.mem[-20:], "places": self.places, "home": self.home,
-                "named": self.named, "age": round(self.age, 1)}
+                "named": self.named, "age": round(self.age, 1), "goal": self.goal, "prev_goal": self.prev_goal,
+                "goal_commit_time": round(self.goal_commit_time, 1)}
 
     @classmethod
     def from_dict(cls, d):
@@ -175,6 +178,9 @@ class Psyche:
                 getattr(p, key).update(d[key])
         p.mem = [tuple(m) for m in d.get("mem", []) if isinstance(m, (list, tuple)) and len(m) == 4]
         p.home, p.named, p.age = d.get("home"), bool(d.get("named")), float(d.get("age", 0.0))
+        p.goal = d.get("goal", "explore")
+        p.prev_goal = d.get("prev_goal")
+        p.goal_commit_time = float(d.get("goal_commit_time", 0.0))
         p.resident = True
         return p
 
@@ -280,15 +286,24 @@ class Psyche:
             u = _m41_adjust(self, a, fa, world, jane, u) or u          # expectations shape choice
         except Exception:
             pass
+        # --- commitment: don't thrash between goals ---
+        self.goal_commit_time += span
+        min_commit = (1.2 if t["energy"] > 0.6 else 2.0) / (1.0 + t["patience"])  # energetic animals commit less
         if self.goal in u:
-            u[self.goal] += 0.12                                        # commitment
+            u[self.goal] += 0.12 + 0.15 * min(1.0, self.goal_commit_time / max(0.1, min_commit))
         goal = max(u, key=u.get)
         try:
             _m41_chose(self, a, fa, world, jane, goal)
         except Exception:
             pass
-        if goal != self.goal and goal in ("follow", "play") and self.goal not in ("follow", "play"):
-            self.learn("jane", fa.clock, "chose to stay with Jane", 0.2, like=0.01)
+        if goal != self.goal:
+            if self.goal_commit_time < min_commit * 0.6:  # too soon to switch
+                goal = self.goal  # stay with current goal
+            else:
+                self.prev_goal = self.goal
+                self.goal_commit_time = 0.0
+                if goal in ("follow", "play") and self.goal not in ("follow", "play"):
+                    self.learn("jane", fa.clock, "chose to stay with Jane", 0.2, like=0.01)
         self.goal = goal
         # ---- act: choose state + target (Fauna executes motion/render) ------------------
         wx_ = world.poi("water")
