@@ -68,4 +68,9 @@ PATCHES = [
     ('m56_casino_integration', 'casino hooks into M42 agency, M43 continuity, M46 world, M44 economy, M04 memory'),
     ('m57_world_expansion', 'M48 living world overhaul: biomes, ecology, weather, seasons, events, world history, simulation LOD'),
     ('m58_politics_war', 'M48 politics & warfare: factions, hierarchy, armies, battles, political events, bandits'),
+    ('m59_crime', 'M48 crime systems: theft, robbery, fencing, criminal enterprises, heat/notoriety tracking'),
+    ('m60_gangs', 'M48 gang systems: territories, gang wars, moral choices, consequence tracking, NPC morality'),
+    ('m61_weapons', 'M48 weapons: realistic guns with specs/markings, ballistics, condition, casino gun trading'),
+    ('m62_objects', 'M48 interactive objects: clickable world objects, Jane learns skills from interactions'),
+    ('m63_violence', 'M48 violence: gunfights, injuries, blood splatters, trauma, combat resolution'),
 ]
