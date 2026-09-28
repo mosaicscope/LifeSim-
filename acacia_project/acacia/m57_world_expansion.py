@@ -276,6 +276,10 @@ class WeatherSim:
             "wind": self.wind,
         }
 
+    def update(self, dt):
+        """Alias for tick() for compatibility with update() call pattern."""
+        return self.tick(dt)
+
     def to_dict(self):
         return {
             "time": self.time,
