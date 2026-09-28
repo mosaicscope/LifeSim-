@@ -240,6 +240,8 @@ class WeatherSim:
         self.temperature = 15.0
         self.precipitation = 0.0
         self.wind = 0.0
+        self.gust = 0.0  # Wind gusts for rendering
+        self.wind_dir = 1.0  # Wind direction
 
     def tick(self, dt):
         """Advance weather simulation."""
@@ -257,16 +259,23 @@ class WeatherSim:
         if r < 0.7:
             self.weather = "clear"
             self.precipitation = 0.0
+            self.wind = self.r.uniform(0.0, 0.2)
         elif r < 0.85:
             self.weather = "cloudy"
             self.precipitation = self.r.uniform(0.0, 0.3)
+            self.wind = self.r.uniform(0.1, 0.4)
         elif r < 0.95:
             self.weather = "rain"
             self.precipitation = self.r.uniform(0.3, 0.8)
+            self.wind = self.r.uniform(0.3, 0.6)
         else:
             self.weather = "storm"
             self.precipitation = 0.9
             self.wind = self.r.uniform(0.6, 1.0)
+
+        # Wind gusts and direction
+        self.gust = self.wind * self.r.uniform(0.5, 1.5)
+        self.wind_dir = self.r.choice([-1.0, 1.0]) if self.r.random() < 0.3 else self.wind_dir
 
         return {
             "season": self.season,
@@ -274,6 +283,8 @@ class WeatherSim:
             "temperature": self.temperature,
             "precipitation": self.precipitation,
             "wind": self.wind,
+            "gust": self.gust,
+            "wind_dir": self.wind_dir,
         }
 
     def update(self, dt):
@@ -288,6 +299,8 @@ class WeatherSim:
             "temperature": self.temperature,
             "precipitation": self.precipitation,
             "wind": self.wind,
+            "gust": self.gust,
+            "wind_dir": self.wind_dir,
         }
 
     def snapshot(self):
