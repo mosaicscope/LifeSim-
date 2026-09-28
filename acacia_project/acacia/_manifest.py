@@ -67,4 +67,5 @@ PATCHES = [
     ('m55_casino', 'persistent casino district: roulette, blackjack, slots, poker, NPC personalities, memory integration'),
     ('m56_casino_integration', 'casino hooks into M42 agency, M43 continuity, M46 world, M44 economy, M04 memory'),
     ('m57_world_expansion', 'M48 living world overhaul: biomes, ecology, weather, seasons, events, world history, simulation LOD'),
+    ('m58_politics_war', 'M48 politics & warfare: factions, hierarchy, armies, battles, political events, bandits'),
 ]
