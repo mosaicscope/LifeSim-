@@ -483,61 +483,81 @@ class SimulationLOD:
 
 
 # ============================================================================
-# 8. INTEGRATION HOOKS
+# 8. APP INTEGRATION & HOOK WIRING
 # ============================================================================
 
-# Hook into app initialization
-_we_prev_init = None
+from acacia.m33_app import App
 
-def _we_init_systems(app):
-    """Initialize world expansion systems."""
-    if not hasattr(app, "world_map"):
-        app.world_map = WorldMap(seed=getattr(app, "seed", 42))
-    if not hasattr(app, "weather_sim"):
-        app.weather_sim = WeatherSim(seed=getattr(app, "seed", 42))
-    if not hasattr(app, "event_engine"):
-        app.event_engine = WorldEventEngine(seed=getattr(app, "seed", 42))
-    if not hasattr(app, "world_history"):
-        app.world_history = WorldHistory(seed=getattr(app, "seed", 42))
+_we_orig_app_init = App.__init__
+_we_orig_update_world = App._update_world
+_we_orig_continuity_save = App._continuity_save if hasattr(App, '_continuity_save') else None
+_we_orig_continuity_load = App._continuity_load if hasattr(App, '_continuity_load') else None
 
 
-def _we_update(app, dt):
-    """Update world systems each frame."""
-    if not hasattr(app, "weather_sim"):
-        _we_init_systems(app)
+def _we_app_init(self, root):
+    """Initialize app with world expansion systems."""
+    _we_orig_app_init(self, root)
+    # Initialize world systems after app is ready
+    if not hasattr(self, "world_map"):
+        self.world_map = WorldMap(seed=getattr(self, "seed", 42))
+    if not hasattr(self, "weather_sim"):
+        self.weather_sim = WeatherSim(seed=getattr(self, "seed", 42))
+    if not hasattr(self, "event_engine"):
+        self.event_engine = WorldEventEngine(seed=getattr(self, "seed", 42))
+    if not hasattr(self, "world_history"):
+        self.world_history = WorldHistory(seed=getattr(self, "seed", 42))
+
+
+def _we_update_world(self, dt):
+    """Update world systems during main loop."""
+    _we_orig_update_world(self, dt)
 
     # Update weather
-    app.weather_sim.tick(dt)
+    if hasattr(self, "weather_sim"):
+        self.weather_sim.update(dt)
 
     # Generate events
-    events = app.event_engine.generate_events(app, dt)
+    if hasattr(self, "event_engine"):
+        events = self.event_engine.generate_events(self, dt)
 
     # Apply ecology
-    apply_ecology_rules(app, dt)
+    apply_ecology_rules(self, dt)
 
 
-# ============================================================================
-# Persistence Integration
-# ============================================================================
-
-def _we_continuity_save(app):
+def _we_continuity_save(self):
     """Save world expansion state."""
-    return {
-        "world_map": app.world_map.to_dict() if hasattr(app, "world_map") else None,
-        "weather_sim": app.weather_sim.to_dict() if hasattr(app, "weather_sim") else None,
-        "event_engine": app.event_engine.to_dict() if hasattr(app, "event_engine") else None,
-        "world_history": app.world_history.to_dict() if hasattr(app, "world_history") else None,
-    }
+    data = _we_orig_continuity_save(self) if _we_orig_continuity_save else {}
+    if isinstance(data, dict):
+        data["_we_world_expansion"] = {
+            "world_map": self.world_map.to_dict() if hasattr(self, "world_map") else None,
+            "weather_sim": self.weather_sim.to_dict() if hasattr(self, "weather_sim") else None,
+            "event_engine": self.event_engine.to_dict() if hasattr(self, "event_engine") else None,
+            "world_history": self.world_history.to_dict() if hasattr(self, "world_history") else None,
+        }
+    return data
 
 
-def _we_continuity_load(app, data):
+def _we_continuity_load(self, data):
     """Load world expansion state."""
-    if data.get("world_map"):
-        app.world_map = WorldMap.from_dict(data["world_map"])
-    if data.get("weather_sim"):
-        app.weather_sim = WeatherSim.from_dict(data["weather_sim"])
-    if data.get("event_engine"):
-        app.event_engine = WorldEventEngine.from_dict(data["event_engine"])
-    if data.get("world_history"):
-        app.world_history = WorldHistory.from_dict(data["world_history"])
-    return True
+    result = _we_orig_continuity_load(self, data) if _we_orig_continuity_load else True
+
+    we_data = data.get("_we_world_expansion", {})
+    if we_data.get("world_map"):
+        self.world_map = WorldMap.from_dict(we_data["world_map"])
+    if we_data.get("weather_sim"):
+        self.weather_sim = WeatherSim.from_dict(we_data["weather_sim"])
+    if we_data.get("event_engine"):
+        self.event_engine = WorldEventEngine.from_dict(we_data["event_engine"])
+    if we_data.get("world_history"):
+        self.world_history = WorldHistory.from_dict(we_data["world_history"])
+
+    return result
+
+
+# Wire into App lifecycle
+App.__init__ = _we_app_init
+App._update_world = _we_update_world
+if _we_orig_continuity_save:
+    App._continuity_save = _we_continuity_save
+if _we_orig_continuity_load:
+    App._continuity_load = _we_continuity_load
