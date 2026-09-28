@@ -166,9 +166,13 @@ def _lw_rebuild(self, w, h, ground, daypart, weather, detail="high"):
     def pine(x, by, hgt, depth):
         col = _mix_hex(_mix_hex("#1f3d24", "#2e5a31", depth), horizon, (1 - depth) * 0.35)
         col = _mix_hex(col, "#0b1018", 0.45 - 0.35 * lit)
-        tw = max(2.0, 3.0 * depth + 1)
-        add(c.create_rectangle(x - tw, by - hgt * 0.2, x + tw, by, fill=_mix_hex("#3a2a1e", "#0b1018", 0.4 - 0.3 * lit),
-                               outline="", tags="world"))
+        # Trunk width scales with height for visual believability
+        tw = max(2.5, hgt * 0.08 + depth * 1.2)  # Better trunk-to-height ratio
+        trunk_color = _mix_hex("#3a2a1e", "#0b1018", 0.4 - 0.3 * lit)
+        # Draw trunk in two parts for depth
+        add(c.create_rectangle(x - tw, by - hgt * 0.25, x + tw, by, fill=trunk_color, outline="", tags="world"))
+        add(c.create_rectangle(x - tw * 0.7, by - hgt * 0.25, x + tw * 0.7, by - hgt * 0.2,
+                               fill=_shade(trunk_color, 1.15), outline="", tags="world"))  # sunlit top
         items = []
         for k in range(4):
             yb = by - hgt * (0.15 + 0.2 * k)
@@ -176,16 +180,22 @@ def _lw_rebuild(self, w, h, ground, daypart, weather, detail="high"):
             it = add(c.create_polygon(x - wdt, yb, x, yb - hgt * 0.36, x + wdt, yb,
                                       fill=_shade(col, 0.9 + 0.06 * k), outline="", tags="world"))
             items.append(it)
-            add(c.create_polygon(x - wdt, yb, x, yb - hgt * 0.36, x - wdt * 0.2, yb,
-                                 fill=_shade(col, 1.12), outline="", tags="world")) if not low else None
+            if not low:
+                add(c.create_polygon(x - wdt, yb, x, yb - hgt * 0.36, x - wdt * 0.2, yb,
+                                     fill=_shade(col, 1.12), outline="", tags="world"))
         return items
 
     def broadleaf(x, by, hgt, depth):
         col = _mix_hex(_mix_hex("#2c4f28", "#3f6b33", depth), horizon, (1 - depth) * 0.35)
         col = _mix_hex(col, "#0b1018", 0.45 - 0.35 * lit)
-        tw = max(2.0, 3.0 * depth + 1)
-        add(c.create_polygon(x - tw, by, x - tw * 0.6, by - hgt * 0.55, x + tw * 0.6, by - hgt * 0.55, x + tw, by,
-                             fill=_mix_hex("#4a3627", "#0b1018", 0.4 - 0.3 * lit), outline="", tags="world"))
+        # Trunk width scales with height
+        tw = max(2.5, hgt * 0.09 + depth * 1.4)  # Broadleaf trees have thicker trunks
+        trunk_color = _mix_hex("#4a3627", "#0b1018", 0.4 - 0.3 * lit)
+        # Trunk is more tapered for broadleaf (suggests natural growth)
+        add(c.create_polygon(x - tw * 0.9, by, x - tw * 0.5, by - hgt * 0.55, x + tw * 0.5, by - hgt * 0.55, x + tw * 0.9, by,
+                             fill=trunk_color, outline="", tags="world"))
+        add(c.create_polygon(x - tw * 0.6, by - hgt * 0.15, x - tw * 0.3, by - hgt * 0.55, x + tw * 0.3, by - hgt * 0.55, x + tw * 0.6, by - hgt * 0.15,
+                             fill=_shade(trunk_color, 1.18), outline="", tags="world"))  # sunlit side
         items = []
         for k, (dx, dy, rr, sh) in enumerate(((-0.22, -0.62, 0.32, 0.86), (0.2, -0.64, 0.3, 0.9),
                                               (0.0, -0.8, 0.36, 1.0), (-0.1, -0.9, 0.24, 1.14))):
