@@ -1,0 +1,22 @@
+:root { --bg:#0c0e13; --panel:rgba(14,18,26,.62); --line:rgba(126,224,200,.18); --text:#eef2f8; --dim:#9aa4b8; --accent:#7ee0c8; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; background:var(--bg); overflow:hidden; font-family:"Segoe UI",Inter,system-ui,sans-serif; color:var(--text); }
+#world { position:fixed; inset:0; width:100vw; height:100vh; display:block; cursor:grab; }
+#world:active { cursor:grabbing; }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; backdrop-filter:blur(8px); }
+#hud-card { position:fixed; left:16px; bottom:16px; padding:9px 14px; max-width:420px; font-size:12.5px; line-height:1.45; pointer-events:none; }
+#hud-card:empty { display:none; }
+#hud-card .goal { font-weight:600; font-size:13.5px; }
+#hud-card .act { color:var(--accent); }
+#hud-card .meta { color:var(--dim); font-size:11.5px; }
+#hud-card .event { color:#f2dcb0; font-size:11.5px; margin-top:3px; font-style:italic; }
+#hud-controls { position:fixed; right:14px; top:12px; display:flex; gap:4px; opacity:.55; transition:opacity .2s; }
+#hud-controls:hover { opacity:1; }
+#hud-controls button { background:rgba(20,26,36,.7); color:var(--text); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:4px 9px; font-size:12px; cursor:pointer; }
+#hud-controls button.on { border-color:var(--accent); color:var(--accent); }
+#tip { position:fixed; padding:6px 10px; font-size:12px; pointer-events:none; display:flex; flex-direction:column; }
+#tip b { color:var(--accent); font-weight:600; }
+#tip span { color:var(--dim); }
+#diag { position:fixed; right:14px; bottom:12px; font:11px Consolas,monospace; color:#b8c2d4; background:rgba(0,0,0,.45); padding:4px 8px; border-radius:5px; }
+#wait { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; color:var(--dim); font-size:13px; }
+.hidden { display:none !important; }

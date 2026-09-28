@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACACIA — World</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="world"></canvas>
+<div id="hud-card" class="panel"></div>
+<div id="hud-controls">
+  <button id="z-out" title="zoom out (−)">−</button>
+  <button id="z-in" title="zoom in (+)">+</button>
+  <button id="follow" class="on" title="follow Jane (F)">FOLLOW</button>
+  <button id="full" title="fullscreen (F11)">⛶</button>
+</div>
+<div id="tip" class="panel hidden"></div>
+<div id="diag" class="hidden"></div>
+<div id="wait">connecting to the simulation…</div>
+<script src="core.js"></script>
+<script src="world.js"></script>
+<script src="jane.js"></script>
+<script src="fauna.js"></script>
+<script src="fx.js"></script>
+<script src="hud.js"></script>
+</body>
+</html>
